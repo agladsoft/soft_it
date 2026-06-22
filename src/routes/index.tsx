@@ -19,7 +19,6 @@ import {
   Factory,
 } from "lucide-react";
 import heroBees from "@/assets/hero-bees.jpg";
-import logoAsset from "@/assets/softit_logo_v3.png.asset.json";
 import honeycombCell from "@/assets/honeycomb-cell.png";
 
 export const Route = createFileRoute("/")({
@@ -53,12 +52,13 @@ const NAV = [
 
 function Logo() {
   return (
-    <a href="#home" className="flex items-center">
+    <a href="#home" className="flex items-center gap-2">
       <img
-        src={logoAsset.url}
+        src="/favicon.png"
         alt="Soft IT"
-        className="h-10 w-auto"
+        className="h-9 w-9"
       />
+      <span className="font-bold text-lg tracking-tight text-foreground">Soft IT</span>
     </a>
   );
 }
