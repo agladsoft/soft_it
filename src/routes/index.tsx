@@ -18,6 +18,7 @@ import {
   HeartPulse,
   Factory,
 } from "lucide-react";
+import { sendContactEmail } from "@/lib/contact";
 import heroBees from "@/assets/hero-bees.jpg";
 import honeycombCell from "@/assets/honeycomb-cell.png";
 
@@ -968,12 +969,12 @@ function Contacts() {
     const data = Object.fromEntries(new FormData(form));
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error();
+      await sendContactEmail({ data: {
+        name: data.name as string,
+        email: data.email as string,
+        company: data.company as string | undefined,
+        message: data.message as string,
+      }});
       setSent(true);
       form.reset();
       setTimeout(() => setSent(false), 5000);

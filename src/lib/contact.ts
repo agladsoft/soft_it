@@ -1,21 +1,20 @@
-import { createAPIFileRoute } from "@tanstack/react-start/api";
+import { createServerFn } from "@tanstack/react-start";
 import nodemailer from "nodemailer";
 
-export const APIRoute = createAPIFileRoute("/api/contact")({
-  POST: async ({ request }) => {
-    const { name, email, company, message } = await request.json();
+type ContactData = {
+  name: string;
+  email: string;
+  company?: string;
+  message: string;
+};
 
-    if (!name || !email || !message) {
-      return new Response(JSON.stringify({ error: "Заполните все обязательные поля" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+export const sendContactEmail = createServerFn({ method: "POST" })
+  .validator((data: ContactData) => data)
+  .handler(async ({ data }) => {
+    const { name, email, company, message } = data;
 
     const transporter = nodemailer.createTransport({
-      host: "mail.beget.com",
-      port: 465,
-      secure: true,
+      service: "gmail",
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -38,10 +37,4 @@ export const APIRoute = createAPIFileRoute("/api/contact")({
         <p>${message.replace(/\n/g, "<br>")}</p>
       `,
     });
-
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  },
-});
+  });
