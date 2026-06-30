@@ -12,6 +12,11 @@ export const sendContactEmail = createServerFn({ method: "POST" })
   .handler(async (ctx) => {
     const { name, email, company, message } = ctx.data as ContactData;
 
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error("SMTP_USER or SMTP_PASS env vars are missing");
+      throw new Error("Email service not configured");
+    }
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -20,7 +25,8 @@ export const sendContactEmail = createServerFn({ method: "POST" })
       },
     });
 
-    await transporter.sendMail({
+    try {
+      await transporter.sendMail({
       from: `"Soft IT — форма связи" <${process.env.SMTP_USER}>`,
       to: "info@softit.io",
       replyTo: email,
@@ -35,5 +41,9 @@ export const sendContactEmail = createServerFn({ method: "POST" })
         <p><b>Сообщение:</b></p>
         <p>${message.replace(/\n/g, "<br>")}</p>
       `,
-    });
+      });
+    } catch (err) {
+      console.error("Failed to send email:", err);
+      throw err;
+    }
   });
