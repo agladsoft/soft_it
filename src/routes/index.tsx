@@ -956,11 +956,32 @@ function Reviews() {
 
 function Contacts() {
   const [sent, setSent] = useState(false);
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSent(true);
-    (e.target as HTMLFormElement).reset();
-    setTimeout(() => setSent(false), 5000);
+    setLoading(true);
+    setError(false);
+
+    const form = e.target as HTMLFormElement;
+    const data = Object.fromEntries(new FormData(form));
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error();
+      setSent(true);
+      form.reset();
+      setTimeout(() => setSent(false), 5000);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <section id="contacts" className="relative py-24 lg:py-32">
@@ -1021,13 +1042,19 @@ function Contacts() {
             </div>
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold hover:bg-primary/90 transition-colors"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
-              Отправить <ArrowRight size={16} />
+              {loading ? "Отправка..." : <><span>Отправить</span><ArrowRight size={16} /></>}
             </button>
             {sent && (
               <div className="flex items-center gap-2 text-sm text-primary animate-fade-in">
                 <CheckCircle2 size={16} /> Спасибо! Мы свяжемся с вами в ближайшее время.
+              </div>
+            )}
+            {error && (
+              <div className="text-sm text-red-500 animate-fade-in">
+                Не удалось отправить сообщение. Попробуйте позже или напишите на info@softit.io
               </div>
             )}
           </form>
