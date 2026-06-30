@@ -9,9 +9,8 @@ type ContactData = {
 };
 
 export const sendContactEmail = createServerFn({ method: "POST" })
-  .validator((data: ContactData) => data)
-  .handler(async ({ data }) => {
-    const { name, email, company, message } = data;
+  .handler(async (ctx) => {
+    const { name, email, company, message } = ctx.data as ContactData;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
